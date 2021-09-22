@@ -1,5 +1,0 @@
-*.terraform.lock.hcl
-*.exe
-*.tfstate
-*.tfplan
-*.tfplan
