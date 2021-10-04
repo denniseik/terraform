@@ -16,12 +16,16 @@ resource "azurerm_public_ip" "azure_firewall" {
 }
 
 resource "azurerm_firewall_policy" "base_policy" {
-  name                = "afwp-base"
+  name                = "afwp-base-01"
   resource_group_name = var.resource_group_name
   location            = var.location
   dns {
     proxy_enabled = true
   }
+  depends_on = [
+    var.region1_mlw_spk_ip_g_id,
+    var.region1_hub_ip_g_id
+  ]
 }
 
 
@@ -41,7 +45,8 @@ resource "azurerm_firewall" "azure_firewall_instance" {
       create = "60m"
       delete = "2h"
   }
-  depends_on = [ azurerm_public_ip.azure_firewall ]
+  depends_on = [ azurerm_public_ip.azure_firewall,
+  azurerm_firewall_policy.base_policy]
 }
 
 resource "azurerm_monitor_diagnostic_setting" "azfw_diag" {
@@ -84,11 +89,11 @@ resource "azurerm_monitor_diagnostic_setting" "azfw_diag" {
   }
 
 }
-
+/*
 resource "azurerm_firewall_policy_rule_collection_group" "hub_to_spoke_rule_collection" {
   name               = "hub-to-spoke-afwpolicy-rcg"
   firewall_policy_id = azurerm_firewall_policy.base_policy.id
-  priority           = 110
+  priority           = 100
 
   network_rule_collection {
     name     = "hub-to-spoke-network-rule-collection"
@@ -103,12 +108,16 @@ resource "azurerm_firewall_policy_rule_collection_group" "hub_to_spoke_rule_coll
       destination_ports     = ["*"]
     }
   }
+  depends_on = [
+    azurerm_firewall_policy.base_policy
+  ]
 }
-
+*/
 resource "azurerm_firewall_policy_rule_collection_group" "aks_rule_collection" {
   name               = "aks-afwpolicy-rcg"
   firewall_policy_id = azurerm_firewall_policy.base_policy.id
   priority           = 200
+
   application_rule_collection {
     name     = "aks-app-rule-collection"
     priority = 200
@@ -213,8 +222,12 @@ resource "azurerm_firewall_policy_rule_collection_group" "aks_rule_collection" {
       destination_ports     = ["123"]
     }
   }
+  depends_on = [
+    azurerm_firewall_policy.base_policy
+    //azurerm_firewall_policy_rule_collection_group.hub_to_spoke_rule_collection
+  ]
 }
-
+/*
 resource "azurerm_firewall_policy_rule_collection_group" "mlw_rule_collection" {
   name               = "mlw-afwpolicy-rcg"
   firewall_policy_id = azurerm_firewall_policy.base_policy.id
@@ -376,7 +389,8 @@ resource "azurerm_firewall_policy_rule_collection_group" "mlw_rule_collection" {
       }
       source_ip_groups = [var.region1_mlw_spk_ip_g_id]      
       destination_fqdns = ["dc.services.visualstudio.com"]
-    }      
+    }
+         
   }
 
   network_rule_collection {
@@ -447,5 +461,10 @@ resource "azurerm_firewall_policy_rule_collection_group" "mlw_rule_collection" {
       destination_addresses = ["MicrosoftContainerRegistry"]
       destination_ports     = ["443"]
     }
-  }    
+  }
+  depends_on = [
+    azurerm_firewall_policy.base_policy,
+    azurerm_firewall_policy_rule_collection_group.aks_rule_collection
+  ] 
 }
+*/

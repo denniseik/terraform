@@ -20,6 +20,9 @@ resource "azurerm_network_interface" "jump_host" {
         private_ip_address_allocation = "Static"
         private_ip_address            = var.jump_host_private_ip_addr
     }
+    depends_on = [
+      azurerm_route_table.jumphost_rt
+    ]
 }
 
 # NSG for jump_host Subnet

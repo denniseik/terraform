@@ -1,0 +1,17 @@
+quickstart/301-machine-learning-hub-spoke-secure/.terraform.lock.hcl
+quickstart/301-machine-learning-hub-spoke-secure/landing_zone/.DS_Store
+quickstart/301-machine-learning-hub-spoke-secure/landing_zone/single_region/.terraform.lock.hcl
+quickstart/301-machine-learning-hub-spoke-secure/landing_zone/single_region/.terraform/providers/registry.terraform.io/hashicorp/azurerm/2.78.0/darwin_amd64/terraform-provider-azurerm_v2.78.0_x5
+quickstart/301-machine-learning-hub-spoke-secure/landing_zone/single_region/.terraform/providers/registry.terraform.io/hashicorp/http/2.1.0/darwin_amd64/terraform-provider-http_v2.1.0_x5
+quickstart/301-machine-learning-hub-spoke-secure/landing_zone/single_region/.terraform/providers/registry.terraform.io/hashicorp/random/3.1.0/darwin_amd64/terraform-provider-random_v3.1.0_x5
+quickstart/301-machine-learning-hub-spoke-secure/landing_zone/single_region/.terraform/modules/modules.json
+.gitignore
+terr
+quickstart/301-machine-learning-hub-spoke-secure/landing_zone/single_region/settings.tfvars
+quickstart/301-machine-learning-hub-spoke-secure/landing_zone/single_region/terraform.tfstate
+quickstart/301-machine-learning-hub-spoke-secure/landing_zone/single_region/terraform.tfstate
+quickstart/301-machine-learning-hub-spoke-secure/landing_zone/single_region/terraform.tfstate.backup
+.gitignore
+quickstart/301-machine-learning-hub-spoke-secure/landing_zone/single_region/.terraform/providers/registry.terraform.io/hashicorp/azurerm/2.79.1/darwin_amd64/terraform-provider-azurerm_v2.79.1_x5
+quickstart/301-machine-learning-hub-spoke-secure/landing_zone/single_region/.terraform/providers/registry.terraform.io/hashicorp/azurerm/2.63.0/darwin_amd64/terraform-provider-azurerm_v2.63.0_x5
+quickstart/301-machine-learning-hub-spoke-secure/landing_zone/single_region/.terraform/modules/modules.json

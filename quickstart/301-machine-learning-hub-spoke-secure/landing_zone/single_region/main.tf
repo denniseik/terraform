@@ -2,7 +2,7 @@ terraform {
   required_providers {
     azurerm = {
       source = "hashicorp/azurerm"
-      version = "2.76"
+      version = "2.79.1"
     }
   }
 }
@@ -114,6 +114,9 @@ module "spoke_vnet_aks_subnet"{
   subnet_name = "snet-aks"
   subnet_prefixes = ["10.3.2.0/24"]
   azure_fw_ip = module.azure_firewall.ip
+  depends_on = [
+    module.spoke_vnet
+  ]
 }
 
 # Spoke Subnet
@@ -124,6 +127,9 @@ module "spoke_vnet_training_subnet"{
   subnet_name = "snet-training"
   subnet_prefixes = ["10.3.3.0/24"]
   azure_fw_ip = module.azure_firewall.ip
+  depends_on = [
+    module.spoke_vnet
+  ]
 }
 
 # Spoke Subnet
@@ -134,6 +140,9 @@ module "spoke_vnet_scoring_subnet"{
   subnet_name = "snet-scoring"
   subnet_prefixes = ["10.3.4.0/24"]
   azure_fw_ip = module.azure_firewall.ip
+  depends_on = [
+    module.spoke_vnet
+  ]
 }
 
 
@@ -190,6 +199,10 @@ module "azure_firewall" {
     azfw_diag_name              = "monitoring-${random_string.random.result}"
     region1_mlw_spk_ip_g_id     = azurerm_ip_group.ip_group_mlw_spoke.id
     region1_hub_ip_g_id         = azurerm_ip_group.ip_group_hub.id
+    depends_on = [
+      azurerm_ip_group.ip_group_hub,
+      azurerm_ip_group.ip_group_mlw_spoke
+    ]
 }
 
 # Jump host 
@@ -209,9 +222,11 @@ module "jump_host" {
     kv_rg                                = azurerm_resource_group.spoke_shared_rg.name
     azure_fw_ip                          = module.azure_firewall.ip
     depends_on = [
-      azurerm_resource_group.spoke_shared_rg
+      azurerm_resource_group.hub_rg,
+      module.azure_firewall
     ]
 }
+
 
 #Spoke shared resource group
 resource "azurerm_resource_group" "spoke_shared_rg" {
@@ -254,9 +269,8 @@ module "keyvault" {
     kv_private_zone_name  = module.private_dns.kv_private_zone_name
 }
 
-
 #Spoke App Insights
-module "app_insights"{
+module "app_insights" {
   source = "../../modules/app_insights"
   location            = var.location
   resource_group_name = azurerm_resource_group.spoke_shared_rg.name
