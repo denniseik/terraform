@@ -4,6 +4,10 @@ resource "azurerm_subnet" "azure_firewall" {
     resource_group_name         = var.resource_group_name
     virtual_network_name        = var.azurefw_vnet_name
     address_prefixes            = [var.azurefw_addr_prefix]
+    depends_on = [
+    var.region1_mlw_spk_ip_g_id,
+    var.region1_hub_ip_g_id
+  ]
     
 } 
 
@@ -13,6 +17,7 @@ resource "azurerm_public_ip" "azure_firewall" {
     resource_group_name         = var.resource_group_name
     allocation_method           = "Static"
     sku                         = "Standard"
+    
 }
 
 resource "azurerm_firewall_policy" "base_policy" {
@@ -24,7 +29,8 @@ resource "azurerm_firewall_policy" "base_policy" {
   }
   depends_on = [
     var.region1_mlw_spk_ip_g_id,
-    var.region1_hub_ip_g_id
+    var.region1_hub_ip_g_id,
+    azurerm_public_ip.azure_firewall
   ]
 }
 
@@ -46,7 +52,8 @@ resource "azurerm_firewall" "azure_firewall_instance" {
       delete = "2h"
   }
   depends_on = [ azurerm_public_ip.azure_firewall,
-  azurerm_firewall_policy.base_policy]
+  azurerm_firewall_policy.base_policy,
+  azurerm_subnet.azure_firewall]
 }
 
 resource "azurerm_monitor_diagnostic_setting" "azfw_diag" {
@@ -89,7 +96,7 @@ resource "azurerm_monitor_diagnostic_setting" "azfw_diag" {
   }
 
 }
-/*
+
 resource "azurerm_firewall_policy_rule_collection_group" "hub_to_spoke_rule_collection" {
   name               = "hub-to-spoke-afwpolicy-rcg"
   firewall_policy_id = azurerm_firewall_policy.base_policy.id
@@ -112,7 +119,7 @@ resource "azurerm_firewall_policy_rule_collection_group" "hub_to_spoke_rule_coll
     azurerm_firewall_policy.base_policy
   ]
 }
-*/
+
 resource "azurerm_firewall_policy_rule_collection_group" "aks_rule_collection" {
   name               = "aks-afwpolicy-rcg"
   firewall_policy_id = azurerm_firewall_policy.base_policy.id
@@ -227,7 +234,7 @@ resource "azurerm_firewall_policy_rule_collection_group" "aks_rule_collection" {
     //azurerm_firewall_policy_rule_collection_group.hub_to_spoke_rule_collection
   ]
 }
-/*
+
 resource "azurerm_firewall_policy_rule_collection_group" "mlw_rule_collection" {
   name               = "mlw-afwpolicy-rcg"
   firewall_policy_id = azurerm_firewall_policy.base_policy.id
@@ -465,6 +472,9 @@ resource "azurerm_firewall_policy_rule_collection_group" "mlw_rule_collection" {
   depends_on = [
     azurerm_firewall_policy.base_policy,
     azurerm_firewall_policy_rule_collection_group.aks_rule_collection
-  ] 
+  ]
+  timeouts {
+    create = "60m"
+    delete = "2h"
+  }
 }
-*/

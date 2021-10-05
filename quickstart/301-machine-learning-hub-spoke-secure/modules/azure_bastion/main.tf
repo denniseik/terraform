@@ -130,4 +130,8 @@ resource "azurerm_bastion_host" "azure_bastion_instance" {
         subnet_id               = azurerm_subnet.azure_bastion.id
         public_ip_address_id    = azurerm_public_ip.azure_bastion.id 
     }
+    timeouts {
+    create = "60m"
+    delete = "2h"
+  }
 }

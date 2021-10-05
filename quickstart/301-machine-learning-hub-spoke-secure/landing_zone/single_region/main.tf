@@ -60,6 +60,9 @@ module "hub_vnet" {
   vnet_name             = "vnet-hub-${var.location}"
   address_space         = "10.1.0.0/16"
   dns_servers = ["168.63.129.16"]
+  depends_on = [
+    azurerm_resource_group.hub_rg
+  ]
 }
 
 #Hub subnets
@@ -71,6 +74,9 @@ module "hub_vnet_default_subnet"{
   subnet_name = "snet-default"
   subnet_prefixes = ["10.1.1.0/24"]
   azure_fw_ip = module.azure_firewall.ip
+  depends_on = [
+    module.hub_vnet
+  ]
 }
 
 #Hub IP Group
@@ -79,6 +85,9 @@ resource "azurerm_ip_group" "ip_group_hub" {
   location            = azurerm_resource_group.hub_rg.location
   resource_group_name = azurerm_resource_group.hub_rg.name
   cidrs = ["10.1.0.0/16"]
+  depends_on = [
+    azurerm_resource_group.hub_rg
+  ]
 
 }
 #IP Group for MLW Spoke Vnet
@@ -87,6 +96,9 @@ resource "azurerm_ip_group" "ip_group_mlw_spoke" {
   location            = azurerm_resource_group.hub_rg.location
   resource_group_name = azurerm_resource_group.hub_rg.name
   cidrs = ["10.3.0.0/16"]
+  depends_on = [
+    azurerm_resource_group.hub_rg
+  ]
 }
 
 #Spoke Vnet Resource Group
@@ -185,6 +197,10 @@ module "bastion" {
   azurebastion_name         = var.azurebastion_name
   azurebastion_vnet_name    = module.hub_vnet.vnet_name
   azurebastion_addr_prefix  = var.azurebastion_addr_prefix
+  depends_on = [
+    azurerm_resource_group.hub_rg,
+    module.hub_vnet
+  ]
 }
 
 #Hub Azure Firewall
@@ -201,7 +217,8 @@ module "azure_firewall" {
     region1_hub_ip_g_id         = azurerm_ip_group.ip_group_hub.id
     depends_on = [
       azurerm_ip_group.ip_group_hub,
-      azurerm_ip_group.ip_group_mlw_spoke
+      azurerm_ip_group.ip_group_mlw_spoke,      
+      module.hub_vnet
     ]
 }
 
@@ -291,4 +308,7 @@ module "machine_learning_workspace" {
   snet_aks_id             = module.spoke_vnet_aks_subnet.subnet_id
   machine_learning_workspace_notebooks_zone_id  = module.private_dns.machine_learning_workspace_notebooks_zone_id
   machine_learning_workspace_api_zone_id        = module.private_dns.machine_learning_workspace_api_zone_id
+  depends_on = [
+    module.spoke_vnet
+  ]
 }
